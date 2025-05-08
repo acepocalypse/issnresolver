@@ -6,7 +6,7 @@ setup(
 
     # Editable fields:
     description='Fast async ISSN ↔ ISSN-L resolver using the ISSN Portal API',
-    long_description=open('README.md').read(),
+    long_description = open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
 
     author='Akmal Setiawan',
