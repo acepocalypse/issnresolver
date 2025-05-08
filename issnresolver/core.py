@@ -131,19 +131,28 @@ def async_lookup(
 ) -> Dict[str, str]:
     """
     Resolve *unique* ISSN/EISSN codes → ISSN-L.
-    Returns {issn: issn_l}
+    Automatically handles both normal scripts and Jupyter notebooks.
     """
     unique = sorted(set(codes))
     try:
-        loop = asyncio.get_running_loop()
-        if loop.is_running():  # inside Jupyter / app
-            return loop.run_until_complete(
-                _bulk_runner(unique, _fetch_issnl_from_issn, workers, rps_cap)
-            )
-    except RuntimeError:
-        pass
-
-    return asyncio.run(_bulk_runner(unique, _fetch_issnl_from_issn, workers, rps_cap))
+        return asyncio.run(_bulk_runner(unique, _fetch_issnl_from_issn, workers, rps_cap))
+    except RuntimeError as e:
+        if "asyncio.run() cannot be called" in str(e):
+            # Likely running inside a Jupyter notebook
+            try:
+                import nest_asyncio
+                nest_asyncio.apply()
+                loop = asyncio.get_running_loop()
+                return loop.run_until_complete(
+                    _bulk_runner(unique, _fetch_issnl_from_issn, workers, rps_cap)
+                )
+            except ImportError:
+                raise RuntimeError(
+                    "You're running in a notebook and need `nest_asyncio`. "
+                    "Install it with `pip install nest_asyncio`"
+                )
+        else:
+            raise
 
 
 def async_lookup_reverse(
@@ -153,19 +162,27 @@ def async_lookup_reverse(
 ) -> Dict[str, List[str]]:
     """
     Resolve ISSN-L codes → list of all related ISSN/EISSN.
-    Returns {issn_l: [issn1, issn2, …]}
+    Automatically handles both normal scripts and Jupyter notebooks.
     """
     unique = sorted(set(issnls))
     try:
-        loop = asyncio.get_running_loop()
-        if loop.is_running():
-            return loop.run_until_complete(
-                _bulk_runner(unique, _fetch_issns_from_issnl, workers, rps_cap)
-            )
-    except RuntimeError:
-        pass
-
-    return asyncio.run(_bulk_runner(unique, _fetch_issns_from_issnl, workers, rps_cap))
+        return asyncio.run(_bulk_runner(unique, _fetch_issns_from_issnl, workers, rps_cap))
+    except RuntimeError as e:
+        if "asyncio.run() cannot be called" in str(e):
+            try:
+                import nest_asyncio
+                nest_asyncio.apply()
+                loop = asyncio.get_running_loop()
+                return loop.run_until_complete(
+                    _bulk_runner(unique, _fetch_issns_from_issnl, workers, rps_cap)
+                )
+            except ImportError:
+                raise RuntimeError(
+                    "You're running in a notebook and need `nest_asyncio`. "
+                    "Install it with `pip install nest_asyncio`"
+                )
+        else:
+            raise
 
 
 # --------------------------------------------------------------------------- #

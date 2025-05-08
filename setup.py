@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='issnresolver',  # keep the same unless renaming on PyPI
-    version='0.1.2',      # bump the version (required for metadata changes)
+    name='issnresolver',
+    version='0.1.3',
 
     # Editable fields:
     description='Fast async ISSN ↔ ISSN-L resolver using the ISSN Portal API',
@@ -26,6 +26,9 @@ setup(
         'pandas>=1.3',
         'tqdm>=4.0',
     ],
+    extras_require={
+        "notebook": ["nest_asyncio"]
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
