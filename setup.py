@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='issnresolver',
-    version='0.1.4',
+    version=get_version(),
 
     # Editable fields:
     description='Fast async ISSN ↔ ISSN-L resolver using the ISSN Portal API',
