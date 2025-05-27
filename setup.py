@@ -1,5 +1,11 @@
 from setuptools import setup, find_packages
 
+def get_version():
+    version_file = os.path.join('issnresolver', 'version.py')
+    with open(version_file, 'r') as f:
+        exec(f.read())
+    return locals()['__version__']
+
 setup(
     name='issnresolver',
     version=get_version(),
