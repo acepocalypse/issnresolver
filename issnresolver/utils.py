@@ -19,7 +19,7 @@ fill_missing_issnl_fast(df, *)  → pd.DataFrame
 from __future__ import annotations
 
 import re
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import pandas as pd
 
@@ -29,18 +29,9 @@ from .core import async_lookup           # forward lookup ISSN → ISSN-L
 _ISSN_RE = re.compile(r"^\d{4}-\d{3}[\dX]$")
 
 
-def clean_issn(code: str | None) -> Optional[str]:
+def _clean_single_issn(code: str | None) -> Optional[str]:
     """
-    Normalise an ISSN/EISSN string to canonical '0000-0000' form.
-
-    Examples
-    --------
-    >>> clean_issn("12345678")
-    '1234-5678'
-    >>> clean_issn("1234-567x")
-    '1234-567X'
-    >>> clean_issn(None)
-    None
+    Normalise a single ISSN/EISSN string to canonical '0000-0000' form.
     """
     if not code or not isinstance(code, str):
         return None
@@ -59,6 +50,30 @@ def clean_issn(code: str | None) -> Optional[str]:
     if _ISSN_RE.match(code):
         return code
     return None
+
+
+def clean_issn(code: Union[str, List[str], None]) -> Union[str, List[str], None]:
+    """
+    Normalise an ISSN/EISSN string or a list of such strings to canonical '0000-0000' form.
+
+    Examples
+    --------
+    >>> clean_issn("12345678")
+    '1234-5678'
+    >>> clean_issn("1234-567x")
+    '1234-567X'
+    >>> clean_issn(["12345678", "1234-567x"])
+    ['1234-5678', '1234-567X']
+    >>> clean_issn(None)
+    None
+    """
+    if code is None:
+        return None
+
+    if isinstance(code, list):
+        return [_clean_single_issn(c) for c in code]
+    else:
+        return _clean_single_issn(code)
 
 
 # --------------------------------------------------------------------------- #
